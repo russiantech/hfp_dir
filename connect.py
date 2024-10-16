@@ -4,17 +4,9 @@ from mysql.connector import Error
 
 """  """
 import os
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Database configuration from environment variable
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-# db = SQLAlchemy(app)
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-"""  """
 # Function to establish a direct MySQL connection
 def get_db_connection():
     try:
@@ -48,8 +40,6 @@ def get_db_connection():
 #     return None
 
 get_db_connection()
-
-
 
 def create_tables():
     conn = get_db_connection()
