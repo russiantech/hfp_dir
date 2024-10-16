@@ -2,13 +2,28 @@ import traceback
 import mysql.connector
 from mysql.connector import Error
 
+"""  """
+import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+
+# Database configuration from environment variable
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+# db = SQLAlchemy(app)
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+"""  """
+# Function to establish a direct MySQL connection
 def get_db_connection():
     try:
+        # Fetching connection parameters from environment variables
         conn = mysql.connector.connect(
-            host='localhost',
-            database='hfp_db',
-            user='techa',  # Default MySQL username in XAMPP
-            password='Techa.Tech500'   # Default MySQL password in XAMPP is usually empty
+            host=os.getenv('DB_HOST', 'localhost'),  # Default is 'localhost'
+            database=os.getenv('DB_NAME', 'hfp_db'),  # Default database name
+            user=os.getenv('DB_USER', 'techa'),  # Default MySQL username
+            password=os.getenv('DB_PASSWORD', 'Techa.Tech500')  # Default MySQL password
         )
         if conn.is_connected():
             print("Successfully connected to MySQL database!")
@@ -16,6 +31,21 @@ def get_db_connection():
     except Error as e:
         print(f"Error: {e}")
     return None
+
+# def get_db_connection():
+#     try:
+#         conn = mysql.connector.connect(
+#             host='localhost',
+#             database='hfp_db',
+#             user='techa',  # Default MySQL username in XAMPP
+#             password='Techa.Tech500'   # Default MySQL password in XAMPP is usually empty
+#         )
+#         if conn.is_connected():
+#             print("Successfully connected to MySQL database!")
+#         return conn
+#     except Error as e:
+#         print(f"Error: {e}")
+#     return None
 
 get_db_connection()
 
@@ -203,14 +233,6 @@ def create_tables():
 # Call the function to initialize the database
 create_tables()
 
-
-
-"""#SQL COMMAND TO DELETE A USER FROM TABLE and also to DELETE A TABLE THAT IS REFERENCE TO OTHERS TABLESBELOW:
-DELETE FROM tablename WHERE id = 5;
-
-DROP TABLE IF EXISTS subscription_plans CASCADE;
-
-"""
 
 
 
