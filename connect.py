@@ -5,8 +5,6 @@ from mysql.connector import Error
 """  """
 import os
 
-app = Flask(__name__)
-
 # Function to establish a direct MySQL connection
 def get_db_connection():
     try:
@@ -40,6 +38,7 @@ def get_db_connection():
 #     return None
 
 get_db_connection()
+
 
 def create_tables():
     conn = get_db_connection()
