@@ -1593,6 +1593,10 @@ def index():
     categories = []
     businesses = []
 
+    if conn is None:
+        flash("Database connection failed", 'error')
+        return render_template('index.html', username=username, businesses=businesses, categories=categories, user_profile=user_profile)
+
     try:
         cur = conn.cursor()
 
@@ -1626,13 +1630,10 @@ def index():
     except Exception as e:
         flash(f"Database error: {e}", 'error')
     finally:
-        conn.close()
+        if conn is not None:  # Ensure conn is not None before closing it
+            conn.close()
 
     return render_template('index.html', username=username, businesses=businesses, categories=categories, user_profile=user_profile)
-
-
-
-
 
 
 if __name__ == '__main__':

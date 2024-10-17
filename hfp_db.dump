@@ -1,0 +1,275 @@
+-- MySQL dump 10.13  Distrib 5.7.29, for Win64 (x86_64)
+--
+-- Host: localhost    Database: hfp_db
+-- ------------------------------------------------------
+-- Server version	8.0.39
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `admin`
+--
+
+DROP TABLE IF EXISTS `admin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `admin` (
+  `id` int NOT NULL,
+  `username` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` int NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `profile_pic` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `admin`
+--
+
+LOCK TABLES `admin` WRITE;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+INSERT INTO `admin` VALUES (1,'admin',0,'pbkdf2:sha256:600000$mhgRHC3YlzDplo2O$c6c804fcd54b10f3efb1fa677a92eba164ab6faac08d7d3c966e4ffede862df3',NULL);
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `business_categories`
+--
+
+DROP TABLE IF EXISTS `business_categories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `business_categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `business_id` int DEFAULT NULL,
+  `category_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `business_id` (`business_id`,`category_id`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `business_categories_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`),
+  CONSTRAINT `business_categories_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `business_categories`
+--
+
+LOCK TABLES `business_categories` WRITE;
+/*!40000 ALTER TABLE `business_categories` DISABLE KEYS */;
+INSERT INTO `business_categories` VALUES (2,1,17),(3,2,14),(4,3,14),(5,4,14),(6,5,14),(7,6,14),(8,7,15),(9,8,14),(10,9,NULL),(11,10,1),(12,11,17),(13,12,13),(14,13,NULL),(15,14,14),(16,15,7),(17,16,NULL),(18,17,12),(19,18,2),(20,19,NULL),(21,20,NULL),(22,21,15),(23,22,12),(24,23,12),(25,24,11),(26,25,14),(27,26,14),(28,27,16),(29,28,14),(30,29,14),(31,30,11),(32,31,11),(33,32,12),(34,33,14),(35,34,9),(36,35,NULL),(37,36,12);
+/*!40000 ALTER TABLE `business_categories` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `business_registration_requests`
+--
+
+DROP TABLE IF EXISTS `business_registration_requests`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `business_registration_requests` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `business_name` varchar(100) NOT NULL,
+  `shop_no` varchar(100) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `description` text NOT NULL,
+  `processed` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id` int DEFAULT NULL,
+  `category` varchar(50) NOT NULL,
+  `block_num` varchar(50) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `business_registration_requests_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `business_registration_requests`
+--
+
+LOCK TABLES `business_registration_requests` WRITE;
+/*!40000 ALTER TABLE `business_registration_requests` DISABLE KEYS */;
+/*!40000 ALTER TABLE `business_registration_requests` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `businesses`
+--
+
+DROP TABLE IF EXISTS `businesses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `businesses` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `owner_id` int DEFAULT NULL,
+  `business_name` varchar(100) NOT NULL,
+  `shop_no` varchar(100) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `description` text NOT NULL,
+  `is_subscribed` tinyint(1) DEFAULT '0',
+  `media_type` enum('image','video') DEFAULT NULL,
+  `media_url` text,
+  `category` varchar(50) NOT NULL,
+  `block_num` varchar(50) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `owner_id` (`owner_id`),
+  CONSTRAINT `businesses_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `businesses`
+--
+
+LOCK TABLES `businesses` WRITE;
+/*!40000 ALTER TABLE `businesses` DISABLE KEYS */;
+INSERT INTO `businesses` VALUES (1,1,'Dunistech Computer Services','60','0903456789','Training the most innovative tech experts and also industry standard tech deployment',1,NULL,NULL,'Fashion','BLOCK D','info@dunistech.ng'),(2,NULL,'WISDOM GROUP','1832','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hpfbusinesses@gmail.com'),(3,NULL,'WISTERIA ESTATES LTD','2462','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A1','hpfbusinesses@gmail.com'),(4,NULL,'WOODLAND PROPERTIES','1831','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hpfbusinesses@gmail.com'),(5,NULL,'WORLD CLASS LIMITED','2944','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A4','hpfbusinesses@gmail.com'),(6,NULL,'WORTHWHILE VENTURES','1831','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hpfbusinesses@gmail.com'),(7,NULL,'TILES SHOP','916','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK D1','hfpbusinesses@gmail.com'),(8,NULL,'360 DEGREES LOGISTICS','1438','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK E1','hfpbusinesses@gmail.com'),(9,NULL,'A & B & C','2614','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A2','hfpbusinesses@gmail.com'),(10,NULL,'ABBYS LANDROMART','1361','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK E1','hfpbusinesses@gmail.com'),(11,NULL,'ADBIRT SOFTWARE COMPANY','2358','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A1','hfpbusinesses@gmail.com'),(12,NULL,'ADCEL GLOBAL LIMITED (ASSORTED WINE)','2057','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F2','hfpbusinesses@gmail.com'),(13,NULL,'Adewe\'s company','5','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK B1','hfpbusinesses@gmail.com'),(14,NULL,'ADFIELD REAL INVESTMENT','954','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK D2','hfpbusinesses@gmail.com'),(15,NULL,'ADOL ELECTRONIC','2199','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F1','hfpbusinesses@gmail.com'),(16,NULL,'Agape Royal Organisation','7','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK B1','hfpbusinesses@gmail.com'),(17,1,'AIMAC GLOBAL TRAVEL','1612','0903456789','i love food',1,NULL,NULL,'Food','BLOCK E2','jamesto962@gmail.com'),(18,NULL,'AIMZ AMIZ BEAUTY','1729','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK E2','hfpbusinesses@gmail.com'),(19,NULL,'AJO ATM','1852','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hfpbusinesses@gmail.com'),(20,NULL,'ALUCAD GLOBAL LIMITED','1936','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F3','hfpbusinesses@gmail.com'),(21,NULL,'ALUMINIUM SHOP','750','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK D1','hfpbusinesses@gmail.com'),(22,NULL,'AMENAM RESTURANT','2856','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A3','hfpbusinesses@gmail.com'),(23,NULL,'AMYS KITCHEN AND TREATS','1484','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK E1','hfpbusinesses@gmail.com'),(24,NULL,'APPLE BASKET CAKES','2619','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A2','hfpbusinesses@gmail.com'),(25,NULL,'APPLE GATE REALTORS LIMITED','2988','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A4','hfpbusinesses@gmail.com'),(26,NULL,'ARCH POINT ARCHITECTS & BUILDERS','3053','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A4','hfpbusinesses@gmail.com'),(27,NULL,'ARRAY FURNITURE','1842','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hfpbusinesses@gmail.com'),(28,NULL,'AZDAC PROPERTY- REAL ESTATE','705','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK C2','hfpbusinesses@gmail.com'),(29,NULL,'AZEEZ IJADUNOLA ADERIGBIGBE & CO','2993','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A4','hfpbusinesses@gmail.com'),(30,NULL,'BAKARY SHOP','1867','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hfpbusinesses@gmail.com'),(31,NULL,'BAKERY','33','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK B1','hfpbusinesses@gmail.com'),(32,NULL,'BAR','52','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK B1','hfpbusinesses@gmail.com'),(33,NULL,'BATEN INVESTMENT COMPANY LIMITED','2815','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A3','hfpbusinesses@gmail.com'),(34,NULL,'BATHROOM WARES','744','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK D1','hfpbusinesses@gmail.com'),(35,NULL,'BATSOLIS INVESTMENT LIMITED','1965','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F3','hfpbusinesses@gmail.com'),(36,NULL,'BEER SHOP','1838','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK F4','hfpbusinesses@gmail.com'),(37,NULL,'BENTHOS SEA FOODS','2616','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK A2','hfpbusinesses@gmail.com'),(38,NULL,'BEREAU DE CHANGE','1367','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK E1','hfpbusinesses@gmail.com'),(39,NULL,'BEST SOURCE HOMES','469','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK B4','hfpbusinesses@gmail.com'),(40,NULL,'BET DELUWA','780','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK D1','hfpbusinesses@gmail.com'),(41,NULL,'BETNAIJA','745','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK D1','hfpbusinesses@gmail.com'),(42,NULL,'BILLY LAUNDRY','1588','000-000-0000','Default description',0,NULL,NULL,'Uncategorized','BLOCK E2','hfpbusinesses@gmail.com'),(43,1,'Technology','60','0903456789','waesrdtfhg',1,NULL,NULL,'Real Estate','BLOCK D','jamesto962@gmail.com');
+/*!40000 ALTER TABLE `businesses` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `categories`
+--
+
+DROP TABLE IF EXISTS `categories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `category_name` (`category_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `categories`
+--
+
+LOCK TABLES `categories` WRITE;
+/*!40000 ALTER TABLE `categories` DISABLE KEYS */;
+INSERT INTO `categories` VALUES (12,'bakeries'),(7,'batteries and solar'),(16,'building materials'),(8,'electrical shops'),(10,'fabric sales'),(2,'fashion'),(14,'food stuffs'),(13,'foods and eatery'),(17,'interior decorations'),(1,'laundry'),(6,'medicals and phamerceuticals'),(3,'photography'),(9,'plastic and home wares'),(4,'printing'),(15,'property and agencies'),(11,'stationeries'),(18,'tech and computer services'),(5,'training centers');
+/*!40000 ALTER TABLE `categories` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `images_videos`
+--
+
+DROP TABLE IF EXISTS `images_videos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `images_videos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `business_id` int DEFAULT NULL,
+  `media_type` enum('image','video') DEFAULT NULL,
+  `media_url` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `business_id` (`business_id`),
+  CONSTRAINT `images_videos_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `images_videos`
+--
+
+LOCK TABLES `images_videos` WRITE;
+/*!40000 ALTER TABLE `images_videos` DISABLE KEYS */;
+/*!40000 ALTER TABLE `images_videos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_registration_requests`
+--
+
+DROP TABLE IF EXISTS `user_registration_requests`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_registration_requests` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` text NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `processed` tinyint(1) DEFAULT '0',
+  `name` varchar(250) DEFAULT NULL,
+  `phone` varchar(250) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_registration_requests`
+--
+
+LOCK TABLES `user_registration_requests` WRITE;
+/*!40000 ALTER TABLE `user_registration_requests` DISABLE KEYS */;
+INSERT INTO `user_registration_requests` VALUES (1,'jameschristo962@gmail.com','pbkdf2:sha256:600000$rMiuqfLzciIoYEjO$d0633cf8acb6be13c498c267d6e3b1235e35446c9fb5233aa9dc233006b13921','jameschristo962@gmail.com','2024-10-16 14:42:34',0,'James Chris James','08138958645');
+/*!40000 ALTER TABLE `user_registration_requests` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_admin` tinyint(1) DEFAULT '0',
+  `is_approved` tinyint(1) DEFAULT '0',
+  `profile_image` text,
+  `suspended` tinyint(1) DEFAULT '0',
+  `activation_token` text,
+  `is_activated` tinyint(1) DEFAULT '0',
+  `registration_request_id` int DEFAULT NULL,
+  `name` varchar(250) DEFAULT NULL,
+  `phone` varchar(250) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`),
+  KEY `registration_request_id` (`registration_request_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`registration_request_id`) REFERENCES `user_registration_requests` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'Dunis','jameschristo962@gmail.com','pbkdf2:sha256:600000$tLgerLSz2RNg2doq$aa2cbd609dbb323023c4755f5f9ec8ac092a52402b437f486172953e3138032a',0,1,'./static/uploads\\images.jpg',0,'ImphbWVzY2hyaXN0bzk2MkBnbWFpbC5jb20i.ZuBiGg.m5CfKqKbVBFGlS5W41FqYpbymUc',1,1,'Dunis Tech','090456789');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-10-17  5:27:53
