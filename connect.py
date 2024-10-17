@@ -22,21 +22,6 @@ def get_db_connection():
         print(f"Error: {e}")
     return None
 
-# def get_db_connection():
-#     try:
-#         conn = mysql.connector.connect(
-#             host='localhost',
-#             database='hfp_db',
-#             user='techa',  # Default MySQL username in XAMPP
-#             password='Techa.Tech500'   # Default MySQL password in XAMPP is usually empty
-#         )
-#         if conn.is_connected():
-#             print("Successfully connected to MySQL database!")
-#         return conn
-#     except Error as e:
-#         print(f"Error: {e}")
-#     return None
-
 get_db_connection()
 
 
@@ -48,7 +33,7 @@ def create_tables():
 
             # Create tables with foreign key constraints
             cur.execute("""
-                CREATE TABLE user_registration_requests (
+                CREATE TABLE IF NOT EXISTS user_registration_requests (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(50) UNIQUE NOT NULL,
                     password TEXT NOT NULL,
@@ -61,7 +46,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE users (
+                CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(255) UNIQUE NOT NULL,
                     email VARCHAR(100) UNIQUE NOT NULL,
@@ -80,7 +65,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE business_registration_requests (
+                CREATE TABLE IF NOT EXISTS business_registration_requests (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     business_name VARCHAR(100) NOT NULL,
                     shop_no VARCHAR(100) NOT NULL,
@@ -97,7 +82,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE businesses (
+                CREATE TABLE IF NOT EXISTS businesses (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     owner_id INT,
                     business_name VARCHAR(100) NOT NULL,
@@ -115,7 +100,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE images_videos (
+                CREATE TABLE IF NOT EXISTS images_videos (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     business_id INT,
                     media_type ENUM('image', 'video'),
@@ -125,14 +110,14 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE categories (
+                CREATE TABLE IF NOT EXISTS categories (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     category_name VARCHAR(255) UNIQUE NOT NULL
                 );
             """)
 
             cur.execute("""
-                CREATE TABLE business_categories (
+                CREATE TABLE IF NOT EXISTS business_categories (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     business_id INT,
                     category_id INT,
@@ -143,7 +128,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE admin (
+                CREATE TABLE IF NOT EXISTS admin (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(255) UNIQUE NOT NULL,
                     password VARCHAR(255) NOT NULL,
@@ -152,7 +137,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE subscription_plans (
+                CREATE IF NOT EXISTS TABLE subscription_plans (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plan_name VARCHAR(50) NOT NULL,
                     amount DECIMAL(10, 2) NOT NULL,
