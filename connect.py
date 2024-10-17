@@ -137,7 +137,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE IF NOT EXISTS TABLE subscription_plans (
+                CREATE TABLE IF NOT EXISTS subscription_plans (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     plan_name VARCHAR(50) NOT NULL,
                     amount DECIMAL(10, 2) NOT NULL,
