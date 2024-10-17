@@ -3,7 +3,7 @@ from flask import Flask, request, redirect, url_for, render_template, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from mysql.connector import Error
-from connect import get_db_connection  # Import the get_db_connection function
+from connect import fetch_categories, get_db_connection  # Import the get_db_connection function
 from werkzeug.utils import secure_filename
 import re, os
 from flask_mail import Mail, Message
@@ -23,6 +23,13 @@ app.config['DEFAULT_LOGO'] = 'img/dunistech.png'
 @app.context_processor
 def inject_logo():
     return {'logo_path': url_for('static', filename=app.config['DEFAULT_LOGO'])}
+
+from flask import session
+@app.before_request
+def load_categories():
+    if 'categories' not in session:
+        categories = fetch_categories()
+        session['categories'] = categories
 
 # // Password Reset Configuration //#
 # Set up the configuration for flask_mail.

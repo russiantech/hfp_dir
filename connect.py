@@ -22,8 +22,22 @@ def get_db_connection():
         print(f"Error: {e}")
     return None
 
-get_db_connection()
+# get_db_connection()
 
+def fetch_categories():
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT id, category_name FROM categories")
+            categories = cur.fetchall()
+            return categories
+        except mysql.connector.Error as e:
+            print(f"Database error: {e}")
+        finally:
+            cur.close()
+            conn.close()
+    return []
 
 def create_tables():
     conn = get_db_connection()
