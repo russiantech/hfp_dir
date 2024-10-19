@@ -126,17 +126,15 @@
         </div>
         <div class="row" id="business-container">
 
-
-
             {% for business in businesses %}
-            <div class="col-lg-4 col-md-4 col-sm-6 col-12 mb-4 store_hei business-item">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-12 rounded mb-4 store_hei business-item">
                 <div class="package-item bg-white mb-2">
                     <!-- Media Section -->
                     {% if business[7] and business[8] %}
                     {% if business[7] == 'image' %}
                     <div class="image-container" style="overflow: hidden; height: 300px;">
-                        <h6 class="m-0"><i class="fa fa-star text-primary mr-2"
-                                style="position: absolute; text-shadow: 2px 2px 4px rgba(216, 216, 216, 0.5); background-color: #7AB730; color: #fff !important; padding: 5px;"><span>premier</span></i>
+                        <h6 class="m-0">
+                            <i class="fa fa-star text-primary mr-2" style="position: absolute; text-shadow: 2px 2px 4px rgba(216, 216, 216, 0.5); background-color: #7AB730; color: #fff !important; padding: 5px;"><span>premier</span></i>
                         </h6>
                         <img src="{{ business[8] }}" alt="Business Image" class="img-fluid"
                             style="object-fit: cover; width: 100%; height: 100%;">
@@ -178,12 +176,7 @@
                         <div class="border-top mt-4 pt-4">
                             <div class=""
                                 style="display: flex !important; justify-content: center !important; align-items: center !important;">
-                                <h6 class="m-0">
-                                    <span><i class="fa fa-shield-alt text-primary mr-2"></i>Trust <small>[<span
-                                                class="text-primary">{{business[2]}}</span>] for</small></span>
-
-                                    <span style="display: flex; justify-content: center; margin-top: 3px;">{{
-                                        business[11]}}</span>
+                                <h6 class="m-0"> <span class="text-primary">Your-site.com here</span></span>
                                 </h6>
                             </div>
                         </div>
@@ -196,7 +189,7 @@
                         </div>
                         {% else %}
                         <div class="text-center mt-3">
-                            <a href="{{ url_for('register_user') }}" class="btn btn-primary">Register Business</a>
+                            <a href="{{ url_for('register_user') }}" class="btn btn-primary rounded">Register Business</a>
                         </div>
                         {% endif %}
                         {% endif %}
@@ -211,6 +204,7 @@
 
 <!-- JavaScript for rotating businesses -->
 <script>
+    /*
     document.addEventListener('DOMContentLoaded', function () {
         const container = document.getElementById('business-container');
         const items = Array.from(container.getElementsByClassName('business-item'));
@@ -237,7 +231,7 @@
 
         rotateBusinesses(); // Rotate businesses initially
         setInterval(rotateBusinesses, 15000); // Rotate every 15 seconds
-    });
+    }); */
 </script>
 
 
@@ -392,7 +386,5 @@
     </div>
 </div>
 <!-- Blog End -->
-
-
-
+ 
 {% endblock %}

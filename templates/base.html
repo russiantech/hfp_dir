@@ -130,11 +130,13 @@
                                 Categories <i class="fa fa-chevron-down ml-2"></i>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                {% for category in session['categories'] %}
-                                <a href="{{ url_for('category_view', category_id=category[0]) }}" class="dropdown-item">
-                                    {{ category[1] }}
-                                </a>
+                                
+                                {% for category in categories %}
+                                    <a href="{{ url_for('category_view', category_id=category.id) }}" class="dropdown-item">
+                                        {{ category.name }}
+                                    </a>
                                 {% endfor %}
+                                
                             </div>
                         </li>
                         
@@ -144,8 +146,7 @@
                     </ul>
                     {% if session.get('user_logged_in') %}
                     <a href="{{ url_for('register_business') }}" class="btn btn-lg ml-3"
-                        style="background-color: #040450;color: white;">Register
-                        Business</a>
+                        style="background-color: #040450;color: white;">Register Business</a>
                     {% else %}
                     <!-- Business Owner Signin Button -->
                     <a href="{{ url_for('register_user') }}" class="btn py-md-3 px-md-5 mt-2 btn-lg rounded"
@@ -246,7 +247,7 @@
                 </p>
             </div>
             <div class="col-lg-6 text-center text-md-right">
-                <p class="m-0 text-white-50">Designed by <a href="#">Dunis Tech</a>
+                <p class="m-0 text-white-50">Designed by <a href="#">Dunis Coders</a>
                 </p>
             </div>
         </div>
@@ -260,14 +261,13 @@
     </a>
 
     <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{ url_for('static', filename='assets/lib/easing/easing.min.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/lib/owlcarousel/owl.carousel.min.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/lib/tempusdominus/js/moment.min.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/lib/tempusdominus/js/moment-timezone.min.js') }}"></script>
-    <script
-        src="{{ url_for('static', filename='assets/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}"></script>
 
     <!-- Contact Javascript File -->
     <script src="{{ url_for('static', filename='assets/mail/jqBootstrapValidation.min.js') }}"></script>

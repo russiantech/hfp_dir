@@ -1,10 +1,4 @@
-import traceback
-import mysql.connector
-from mysql.connector import Error
-
-"""  """
-import os
-
+import mysql.connector, os
 # Function to establish a direct MySQL connection
 def get_db_connection():
     try:
@@ -18,26 +12,30 @@ def get_db_connection():
         if conn.is_connected():
             print("Successfully connected to MySQL database!")
         return conn
-    except Error as e:
+    except mysql.connector.Error as e:
         print(f"Error: {e}")
     return None
 
-# get_db_connection()
-
 def fetch_categories():
     conn = get_db_connection()
+    categories = []
     if conn:
         try:
-            cur = conn.cursor()
+            cur = conn.cursor(dictionary=True)  # Fetch rows as dictionaries
             cur.execute("SELECT id, category_name FROM categories")
-            categories = cur.fetchall()
-            return categories
+            result = cur.fetchall()
+            # categories = {row['id']: row['category_name'] for row in result}  # Convert to dict
+
+            categories = [{"id": row['id'], 'name': row['category_name'] } for row in result]  # List of named tuples
+            
         except mysql.connector.Error as e:
             print(f"Database error: {e}")
         finally:
             cur.close()
             conn.close()
-    return []
+            
+    # return categories  # Return categories as dict
+    return {"categories": categories}
 
 def create_tables():
     conn = get_db_connection()
@@ -160,13 +158,36 @@ def create_tables():
                 );
             """)           
             
-            cur.execute("""INSERT INTO subscription_plans (plan_name, amount, duration) VALUES 
-                        ('Monthly', 10000, 1), 
-                        ('Yearly', 85000, 12)
-                        """)    
+            # cur.execute("""INSERT INTO subscription_plans (plan_name, amount, duration) VALUES 
+            #             ('Monthly', 10000, 1), 
+            #             ('Yearly', 85000, 12)
+            #             """)   
+            # Define the subscription plans you want to insert
+            plans = [
+                ('Monthly', 10000, 1),
+                ('Yearly', 85000, 12)
+            ]
+
+            # Loop through each plan and check if it exists before inserting
+            for plan_name, amount, duration in plans:
+                # Check if the plan already exists
+                cur.execute("SELECT 1 FROM subscription_plans WHERE plan_name = %s", (plan_name,))
+                result = cur.fetchone()
+                
+                # If no result is found, insert the new plan
+                if result is None:
+                    cur.execute("""INSERT INTO subscription_plans (plan_name, amount, duration) 
+                                VALUES (%s, %s, %s)""", (plan_name, amount, duration))
+                    print(f"Inserted plan: {plan_name}")
+                else:
+                    print(f"Plan '{plan_name}' already exists, skipping insertion.")
+
+            # Don't forget to commit the transaction after insertion
+            # conn.commit()
+ 
 
             cur.execute("""
-                CREATE TABLE subscriptions (
+                CREATE TABLE IF NOT EXISTS subscriptions (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     business_id INT,
                     subscription_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -178,7 +199,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE payments (
+                CREATE TABLE IF NOT EXISTS payments (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     subscription_id INT,
                     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -190,7 +211,7 @@ def create_tables():
             """)
 
             cur.execute("""
-                CREATE TABLE claim_requests (
+                CREATE TABLE IF NOT EXISTS claim_requests (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     business_id INT,
                     user_id INT,

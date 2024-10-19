@@ -1,4 +1,5 @@
 from random import randint, random
+import traceback
 from flask import Flask, request, redirect, url_for, render_template, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
@@ -10,9 +11,7 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import socket
 
-
 # from flask_wtf.csrf import CSRFProtect
-
 
 app = Flask(__name__)
 app.secret_key = 'you-will-neva-guess'  # Replace with a real secret key for session management
@@ -24,19 +23,15 @@ app.config['DEFAULT_LOGO'] = 'img/dunistech.png'
 def inject_logo():
     return {'logo_path': url_for('static', filename=app.config['DEFAULT_LOGO'])}
 
-from flask import session
-@app.before_request
-def load_categories():
-    if 'categories' not in session:
-        categories = fetch_categories()
-        session['categories'] = categories
+# categories = fetch_categories()
+app.context_processor(fetch_categories)
 
 # // Password Reset Configuration //#
 # Set up the configuration for flask_mail.
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 # //update it with your gmail
-app.config['MAIL_USERNAME'] = 'Dunistech Codersrich@gmail.com'
+app.config['MAIL_USERNAME'] = 'efezinorich@gmail.com'
 # //update it with your password
 app.config['MAIL_PASSWORD'] = 'pmro zhcu hxkd iwwq'
 app.config['MAIL_USE_SSL'] = True
@@ -129,10 +124,9 @@ def register_user():
 
 @app.route('/register_business', methods=['GET', 'POST'])
 def register_business():
+    
     if 'user_logged_in' not in session:
         return redirect(url_for('user_login'))
-
-    categories = []  # Initialize categories
 
     if request.method == 'POST':
         business_name = request.form['business_name']
@@ -165,20 +159,7 @@ def register_business():
 
         return redirect(url_for('user_business_profile'))
 
-    elif request.method == 'GET':
-        conn = get_db_connection()
-        cur = conn.cursor()
-        try:
-            # Fetch categories for the GET request
-            cur.execute("SELECT * FROM categories")
-            categories = cur.fetchall()
-        except Exception as e:
-            flash(f"Database error: {e}", 'error')
-        finally:
-            cur.close()
-            conn.close()
-
-    return render_template('register_business.html', categories=categories)
+    return render_template('register_business.html')
 
 
 @app.route('/user_login', methods=['GET', 'POST'])
@@ -318,17 +299,11 @@ def user_business_profile():
     businesses = None
     pending_businesses = None
     subscription_plans = None
-    categories = []
-
 
     if conn:
         try:
             cur = conn.cursor()
 
-            # Fetch categories
-            cur.execute("SELECT * FROM categories")
-            categories = cur.fetchall()
-                
             # Fetch approved businesses
             cur.execute("""
                 SELECT id, business_name, shop_no, phone_number, description, is_subscribed, media_type, media_url, category, email
@@ -361,7 +336,7 @@ def user_business_profile():
     return render_template('user_business_profile.html', 
                            businesses=businesses, 
                            pending_businesses=pending_businesses,
-                           subscription_plans=subscription_plans, categories=categories)
+                           subscription_plans=subscription_plans)
 
 
 @app.route('/edit_business_media/<int:business_id>', methods=['GET', 'POST'])
@@ -455,12 +430,6 @@ def update_profile():
 
     user_id = session['user_id']
     conn = get_db_connection()
-    categories = []
-    
-    cur = conn.cursor()
-    # Fetch categories
-    cur.execute("SELECT * FROM categories")
-    categories = cur.fetchall()
 
     if request.method == 'POST':
         username = request.form['username']
@@ -512,42 +481,9 @@ def update_profile():
         finally:
             conn.close()
 
-    return render_template('profile.html', user=user, categories=categories)
+    return render_template('profile.html', user=user)
 
 ### Admin Routes ###
-# @app.route('/admin_login', methods=['GET', 'POST'])
-# def admin_login():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         conn = get_db_connection()
-#         if conn:
-#             try:
-#                 cur = conn.cursor()
-#                 cur.execute("SELECT * FROM admin WHERE username = %s", (username,))
-
-#                 admin = cur.fetchone()
-#                 cur.close()
-#                 conn.close()
-#                 print(admin)
-#                 # print(
-#                 #     "check_password_hash(admin[2], password)", check_password_hash(admin[2], password)
-#                 # )
-#                 if admin and check_password_hash(admin[3], password):  # Assuming password is in the 3rd column
-#                     session['admin_logged_in'] = True
-#                     session['admin_id'] = admin[0]  # Store admin id in the session
-#                     session['admin_username'] = admin[1]  # Store admin Username in the session
-#                     session['admin_profile_pic'] = admin[3]  # Store admin profile_pic in the session
-
-                    
-#                     flash('Admin has been login sucessful.', 'success')
-#                     return redirect(url_for('admin_dashboard'))
-#                 else:
-#                     flash("Invalid credentials.", 'error')
-#             except Exception as e:
-#                 print(f"Database error: {e}")
-#                 flash("Error occurred during login.", 'error')
-#     return render_template('admin_login.html')
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
@@ -685,9 +621,6 @@ def admin_profile():
         flash('Admin profile not found.', 'error')
         return redirect(url_for('admin_login'))
 
-
-
-
 @app.route('/admin_dashboard')
 def admin_dashboard():
     if 'admin_logged_in' not in session:
@@ -724,7 +657,6 @@ def admin_dashboard():
             # Fetch admin profile picture URL
             admin_id = session.get('admin_id')
             cur.execute("SELECT profile_pic FROM admin WHERE id = %s", (admin_id,))
-            profile_pic_path = cur.fetchone()[0]
             
             # Fetch all user registration requests
             cur.execute("SELECT * FROM user_registration_requests")
@@ -784,8 +716,6 @@ def review_claim(request_id):
         cur = conn.cursor()
 
         if request.method == 'POST':
-            print("Handling POST request")
-
             # Fetch the claim request details
             cur.execute("""
                 SELECT business_id, user_id, phone_number, email, category, description
@@ -1050,35 +980,6 @@ def activate_account(token):
             conn.close()
 
     return redirect(url_for('user_login'))
-
-
-
-# @app.route('/approve_user', methods=['POST'])
-# def approve_user():
-#     if 'admin_logged_in' not in session:
-#         return redirect(url_for('admin_login'))
-
-#     username = request.form['username']
-
-#     conn = get_db_connection()
-#     if conn:
-#         try:
-#             cur = conn.cursor()
-#             # Approve the user by setting is_approved to True
-#             cur.execute(
-#                 "UPDATE users SET is_approved = TRUE WHERE username = %s",
-#                 (username,)
-#             )
-#             conn.commit()
-#             flash('User approved successfully.', 'success')
-#         except Exception as e:
-#             print(f"Database error: {e}")
-#             flash('Error approving user.', 'error')
-#         finally:
-#             cur.close()
-#             conn.close()
-
-#     return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/admin/users')
@@ -1416,10 +1317,8 @@ def subscribe(business_id):
     return redirect(url_for('user_business_profile'))
 
 
-
-
-@app.route('/search_business', methods=['GET', 'POST'])
-def search_business():
+@app.route('/search_business-former', methods=['GET', 'POST'])
+def search_business_former():
     search_query = request.args.get('search_query', '')  # Get the search query from the URL parameters
     businesses = []
 
@@ -1427,27 +1326,24 @@ def search_business():
         conn = get_db_connection()
         if conn:
             try:
-                cur = conn.cursor()
-                        # Fetch categories
-                cur.execute("SELECT * FROM categories")
-                categories = cur.fetchall()
 
+                cur = conn.cursor()
                 # Query to search subscribed businesses and unsubscribed businesses with no owner
+                """ need mainly business[name, email, image, phone, website] """
+                # query = """
+                #     SELECT DISTINCT b.id, b.business_name, b.shop_no, c.category_name
+                #     FROM businesses b
+                #     LEFT JOIN business_categories bc ON b.id = bc.business_id
+                #     LEFT JOIN categories c ON bc.category_id = c.id
+                #     WHERE (b.is_subscribed = TRUE OR (b.is_subscribed = FALSE AND b.owner_id IS NULL))
+                #     AND (c.category_name LIKE %s OR b.business_name LIKE %s OR b.shop_no LIKE %s)
+                # """
                 query = """
-                    SELECT DISTINCT ON (b.id) b.*, c.category_name
+                    SELECT DISTINCT b.media_url, b.phone_number, b.email, b.business_name, b.media_type, c.category_name
                     FROM businesses b
                     LEFT JOIN business_categories bc ON b.id = bc.business_id
                     LEFT JOIN categories c ON bc.category_id = c.id
-                    WHERE 
-                        (
-                            b.is_subscribed = TRUE OR
-                            (b.is_subscribed = FALSE AND b.owner_id IS NULL)
-                        ) 
-                    AND (
-                        c.category_name ILIKE %s OR
-                        b.business_name ILIKE %s OR 
-                        b.shop_no ILIKE %s
-                    )
+                    WHERE (c.category_name LIKE %s OR b.business_name LIKE %s OR b.shop_no LIKE %s)
                 """
                 # Prepare search patterns with wildcards for partial matches
                 search_pattern = f"%{search_query}%"
@@ -1467,34 +1363,74 @@ def search_business():
     else:
         no_results_message = None
 
-    return render_template('search_result.html', businesses=businesses, search_query=search_query, no_results_message=no_results_message, categories=categories)
+    context = {
+         "businesses":businesses, 
+         "search_query":search_query, 
+         "no_results_message":no_results_message
+    }
+    return render_template('search_result_former.html', **context)
 
+
+
+@app.route('/search_business', methods=['GET', 'POST'])
+def search_business():
+    search_query = request.args.get('search_query', '')  # Get the search query from the URL parameters
+    businesses = []
+
+    if search_query:
+        conn = get_db_connection()
+        if conn:
+            try:
+                # Use DictCursor to fetch results as dictionaries
+                cur = conn.cursor(dictionary=True)
+                
+                # Query to search subscribed businesses and unsubscribed businesses with no owner
+                query = """
+                    SELECT DISTINCT b.id, b.media_url, b.phone_number, b.email, b.business_name, b.media_type, c.category_name
+                    FROM businesses b
+                    LEFT JOIN business_categories bc ON b.id = bc.business_id
+                    LEFT JOIN categories c ON bc.category_id = c.id
+                    WHERE (c.category_name LIKE %s OR b.business_name LIKE %s OR b.shop_no LIKE %s)
+                """
+                
+                # Prepare search patterns with wildcards for partial matches
+                search_pattern = f"%{search_query}%"
+                
+                cur.execute(query, (search_pattern, search_pattern, search_pattern))
+                businesses = cur.fetchall()
+
+                cur.close()
+            except Exception as e:
+                flash(f"Database error: {e}", 'error')
+            finally:
+                conn.close()
+
+    # Check if businesses list is empty and pass an additional variable to the template
+    if not businesses:
+        no_results_message = "No businesses found for your search."
+    else:
+        no_results_message = None
+
+    context = {
+        "businesses": businesses, 
+        "search_query": search_query, 
+        "no_results_message": no_results_message
+    }
+    return render_template('search_result.html', **context)
 
 @app.route('/categories')
 def categories():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM categories")
-    categories = cur.fetchall()
-    cur.close()
-    conn.close()
-
-    return render_template('categories.html', categories=categories)
+    return render_template('categories.html')
 
 
 @app.route('/category/<int:category_id>')
 def category_view(category_id):
     conn = get_db_connection()
-    categories = []
     businesses = []
     category_name = None
 
     try:
         cur = conn.cursor()
-
-        # Fetch all categories
-        cur.execute("SELECT * FROM categories")
-        categories = cur.fetchall()
 
         # Fetch the category name
         cur.execute("SELECT category_name FROM categories WHERE id = %s", (category_id,))
@@ -1524,21 +1460,17 @@ def category_view(category_id):
     finally:
         conn.close()
 
-    return render_template('category_view.html', category_name=category_name, businesses=businesses, categories=categories)
+    return render_template('category_view.html', category_name=category_name, businesses=businesses)
 
 
 
 @app.route('/logout')
 def logout():
-    print("Session before logout:", session)  # Debug: Print session variables
+    # print("Session before logout:", session)  # Debug: Print session variables
     session.clear()
    
     flash('No one is logged in.', 'warning')
     return redirect(url_for('index'))
-
-
-
-
 
 
 @app.route('/claim_business/<int:business_id>', methods=['GET', 'POST'])
@@ -1587,24 +1519,18 @@ def claim_business(business_id):
 
 @app.route('/')
 def index():
-    username = session.get('username')
-    user_id = session.get('user_id')
-    user_profile = None  # Initialize user_profile to None
-
-    conn = get_db_connection()
-    categories = []
-    businesses = []
-
-    if conn is None:
-        flash("Database connection failed", 'error')
-        return render_template('index.html', username=username, businesses=businesses, categories=categories, user_profile=user_profile)
 
     try:
-        cur = conn.cursor()
+        
+        # session.clear()
+        # print(session['categories'])
+        username = session.get('username')
+        user_profile = None  # Initialize user_profile to None
 
-        # Fetch categories
-        cur.execute("SELECT * FROM categories")
-        categories = cur.fetchall()
+        conn = get_db_connection()
+        businesses = []
+
+        cur = conn.cursor()
 
         # Fetch publicly available businesses (not subscribed and no owner)
         cur.execute("""
@@ -1612,12 +1538,13 @@ def index():
             WHERE is_subscribed = FALSE AND owner_id IS NULL
         """)
         businesses = cur.fetchall()
-
+    
         # Fetch subscribed businesses (including those belonging to the logged-in user)
         cur.execute("""
             SELECT * FROM businesses
             WHERE is_subscribed = TRUE
         """)
+        
         subscribed_businesses = cur.fetchall()
 
         # Combine the lists
@@ -1629,13 +1556,22 @@ def index():
             user_profile = cur.fetchone()
 
         cur.close()
-    except Exception as e:
-        flash(f"Database error: {e}", 'error')
-    finally:
-        if conn is not None:  # Ensure conn is not None before closing it
-            conn.close()
+        
+        context = {
+            "username":username, "businesses":businesses, "user_profile":user_profile
+        }
+        
+        return render_template('index.html', **context)
 
-    return render_template('index.html', username=username, businesses=businesses, categories=categories, user_profile=user_profile)
+    except Exception as e:
+        traceback.print_exc
+        flash(f"Database error: {e}", 'error')
+        print(f"{e}")
+        return f"{e}"
+        
+    finally:
+        if conn and conn is not None:  # Ensure conn is not None before closing it
+            conn.close()
 
 # if __name__ == '__main__':
 #     serve(app, host='0.0.0.0', port=8000)

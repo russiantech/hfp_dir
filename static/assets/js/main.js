@@ -14,8 +14,10 @@
                 $('.navbar .dropdown').off('mouseover').off('mouseout');
             }
         }
+
         toggleNavbarMethod();
         $(window).resize(toggleNavbarMethod);
+        
     });
     
     
